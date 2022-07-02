@@ -58,38 +58,38 @@ export default function Kitties(props) {
     }
   }
 
-  const subscribeKitties = () => {
-    let unsub = null
+  // const subscribeKitties = () => {
+  //   let unsub = null
 
-    const asyncFetch = async () => {
-      const k0 = await api.query.substrateKitties.kitties(
-        '0xfc3cf622247e7f72ce6ac0e85d0ba359108998842f60cc6175c741e27afaff1b'
-      )
-      console.log('!!!!k0', k0)
-      unsub = await api.query.substrateKitties.kitties.multi(
-        kittyIds,
-        kitties => {
-          console.log('!!!!kittyIds', kittyIds)
-          // console.log('!!!!kitties', kitties)
-          const kittiesMap = kitties.map(kitty => {
-            console.log('!!!!kitty', kitty)
+  //   const asyncFetch = async () => {
+  //     const k0 = await api.query.substrateKitties.kitties(
+  //       '0xfc3cf622247e7f72ce6ac0e85d0ba359108998842f60cc6175c741e27afaff1b'
+  //     )
+  //     console.log('!!!!k0', k0)
+  //     unsub = await api.query.substrateKitties.kitties.multi(
+  //       kittyIds,
+  //       kitties => {
+  //         console.log('!!!!kittyIds', kittyIds)
+  //         // console.log('!!!!kitties', kitties)
+  //         const kittiesMap = kitties.map(kitty => {
+  //           console.log('!!!!kitty', kitty)
 
-            console.log('!!!!222kitty', kitty.unwrapOr(api.createType(117)))
+  //           console.log('!!!!222kitty', kitty.unwrapOr(api.createType(117)))
 
-            console.log('!!!!kitty.unwrap()', kitty.unwrap())
-            return parseKitty(kitty.unwrap())
-          })
-          setKitties(kittiesMap)
-        }
-      )
-    }
+  //           console.log('!!!!kitty.unwrap()', kitty.unwrap())
+  //           return parseKitty(kitty.unwrap())
+  //         })
+  //         setKitties(kittiesMap)
+  //       }
+  //     )
+  //   }
 
-    asyncFetch()
+  //   asyncFetch()
 
-    return () => {
-      unsub && unsub()
-    }
-  }
+  //   return () => {
+  //     unsub && unsub()
+  //   }
+  // }
 
   useEffect(subscribeCount, [api, keyring])
   // useEffect(subscribeKitties, [api, keyring, kittyIds])
