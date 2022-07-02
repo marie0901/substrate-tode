@@ -1,0 +1,15 @@
+{
+  "APP_NAME": "substrate-front-end-template",
+  "CUSTOM_RPC_METHODS": {},
+  "CUSTOM_TYPES": {
+    "Gender": {
+      "_enum": ["Male", "Female"]
+    },
+    "Kitty": {
+      "dna": "[u8; 16]",
+      "price": "Option<Balance>",
+      "gender": "Gender",
+      "ownder": "AccountId"
+    }
+  }
+}
