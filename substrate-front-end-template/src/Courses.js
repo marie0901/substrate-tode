@@ -6,10 +6,10 @@ import { TxButton } from './substrate-lib/components'
 
 import CourseCards from './CourseCards'
 
-const parseKitty = ({ dna, price, gender, owner }) => ({
-  dna,
+const parseKitty = ({ slug, price, gender, owner }) => ({
+  slug,
   price: price.toJSON(),
-  gender: gender.toJSON(),
+  gender: 'female',
   owner: owner.toJSON(),
 })
 
@@ -33,7 +33,7 @@ export default function Kitties(props) {
     const asyncFetch = async () => {
       unsub = await api.query.substrateTode.countForKitties(async count => {
         // Fetch all kitty keys
-        const entries = await api.query.substrateTode.kitties.entries()
+        const entries = await api.query.substrateTode.courses.entries()
         // console.log('!!!!! entries', entries)
         // const ids = entries.map(entry => toHexString(entry[0].slice(-32)))
         const ids = entries.map(entry => {
@@ -73,7 +73,7 @@ export default function Kitties(props) {
             setStatus={setStatus}
             attrs={{
               palletRpc: 'substrateTode',
-              callable: 'createKitty',
+              callable: 'createCourse',
               inputParams: [],
               paramFields: [],
             }}

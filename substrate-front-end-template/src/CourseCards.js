@@ -192,8 +192,8 @@ const BuyKitty = props => {
 
 const KittyCard = props => {
   const { kitty, setStatus } = props
-  const { dna = null, owner = null, gender = null, price = null } = kitty
-  const displayDna = dna && dna.toJSON()
+  const { slug = null, owner = null, gender = null, price = null } = kitty
+  const displayDna = slug && slug.toJSON()
   const { currentAccount } = useSubstrateState()
   const isSelf = currentAccount.address === kitty.owner
 
@@ -204,7 +204,7 @@ const KittyCard = props => {
           Mine
         </Label>
       )}
-      <KittyAvatar dna={dna.toU8a()} />
+      <KittyAvatar dna={slug.toU8a()} />
       <Card.Content>
         <Card.Meta style={{ fontSize: '.9em', overflowWrap: 'break-word' }}>
           DNA: {displayDna}
@@ -231,7 +231,7 @@ const KittyCard = props => {
       </Card.Content>
       <Card.Content>
         <Button>
-          <Link to={`/course/${dna}`}>Go to Course</Link>
+          <Link to={`/course/${slug}`}>Go to Course</Link>
         </Button>
       </Card.Content>
     </Card>
