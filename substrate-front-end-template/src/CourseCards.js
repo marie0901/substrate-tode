@@ -1,4 +1,5 @@
 import React from 'react'
+import { Link } from 'react-router-dom'
 import {
   Button,
   Card,
@@ -62,7 +63,7 @@ const TransferModal = props => {
           setStatus={setStatus}
           onClick={confirmAndClose}
           attrs={{
-            palletRpc: 'substrateKitties',
+            palletRpc: 'substrateTode',
             callable: 'transfer',
             inputParams: [formValue.target, kitty.dna],
             paramFields: [true, true],
@@ -122,7 +123,7 @@ const SetPrice = props => {
           setStatus={setStatus}
           onClick={confirmAndClose}
           attrs={{
-            palletRpc: 'substrateKitties',
+            palletRpc: 'substrateTode',
             callable: 'setPrice',
             inputParams: [kitty.dna, formValue.target],
             paramFields: [true, true],
@@ -155,11 +156,11 @@ const BuyKitty = props => {
       open={open}
       trigger={
         <Button basic color="green">
-          Buy Kitty
+          Buy Course
         </Button>
       }
     >
-      <Modal.Header>Buy Kitty</Modal.Header>
+      <Modal.Header>Buy Course</Modal.Header>
       <Modal.Content>
         <Form>
           <Form.Input fluid label="Kitty ID" readOnly value={kitty.dna} />
@@ -171,12 +172,12 @@ const BuyKitty = props => {
           Cancel
         </Button>
         <TxButton
-          label="Buy Kitty"
+          label="Buy Course"
           type="SIGNED-TX"
           setStatus={setStatus}
           onClick={confirmAndClose}
           attrs={{
-            palletRpc: 'substrateKitties',
+            palletRpc: 'substrateTode',
             callable: 'buyKitty',
             inputParams: [kitty.dna, kitty.price],
             paramFields: [true, true],
@@ -227,6 +228,11 @@ const KittyCard = props => {
             <BuyKitty kitty={kitty} setStatus={setStatus} />
           </>
         )}
+      </Card.Content>
+      <Card.Content>
+        <Button>
+          <Link to={`/course/${dna}`}>Go to Course</Link>
+        </Button>
       </Card.Content>
     </Card>
   )
