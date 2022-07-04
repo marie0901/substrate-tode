@@ -281,7 +281,7 @@ impl pallet_tode::Config for Runtime {
 	type Event = Event;
 	type Currency = Balances;
 	type KittyRandomness = RandomnessCollectiveFlip;
-	type MaxKittiesOwned = ConstU32<100>;
+	type MaxCoursesOwned = ConstU32<100>;
 }
 
 // Create the runtime by composing the FRAME pallets that were previously configured.

@@ -153,6 +153,6 @@ fn testnet_genesis(
 		},
 		transaction_payment: Default::default(),
 		substrate_kitties: SubstrateKittiesConfig { kitties: vec![] },
-		substrate_tode: SubstrateTodeConfig { kitties: vec![] },
+		substrate_tode: SubstrateTodeConfig { courses: vec![] },
 	}
 }

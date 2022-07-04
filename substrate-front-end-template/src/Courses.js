@@ -31,7 +31,7 @@ export default function Kitties(props) {
     let unsub = null
 
     const asyncFetch = async () => {
-      unsub = await api.query.substrateTode.countForKitties(async count => {
+      unsub = await api.query.substrateTode.countForCourses(async count => {
         // Fetch all kitty keys
         const entries = await api.query.substrateTode.courses.entries()
         // console.log('!!!!! entries', entries)

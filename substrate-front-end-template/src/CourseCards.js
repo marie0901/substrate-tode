@@ -245,7 +245,7 @@ const KittyCards = props => {
     return (
       <Message info>
         <Message.Header>
-          No Kitty found here... Create one now!&nbsp;
+          No Course found here... Create one now!&nbsp;
           <span role="img" aria-label="point-down">
             👇
           </span>

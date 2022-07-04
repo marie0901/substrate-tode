@@ -9,13 +9,7 @@ import {
 } from 'semantic-ui-react'
 import 'semantic-ui-css/semantic.min.css'
 
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  useParams,
-  useNavigate,
-} from 'react-router-dom'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 
 import { SubstrateContextProvider, useSubstrateState } from './substrate-lib'
 import { DeveloperConsole } from './substrate-lib/components'
@@ -31,18 +25,19 @@ import TemplateModule from './TemplateModule'
 import Transfer from './Transfer'
 import Upgrade from './Upgrade'
 import Courses from './Courses'
+import Course from './Course'
 
-const Course = () => {
-  const push = useNavigate()
-  const { id } = useParams()
+// const Course = () => {
+//   const push = useNavigate()
+//   const { id } = useParams()
 
-  return (
-    <div>
-      <h1>Single Course id (dna) = {id} </h1>
-      <button onClick={() => push('/')}>Go back</button>
-    </div>
-  )
-}
+//   return (
+//     <div>
+//       <h1>Single Course id (dna) = {id} </h1>
+//       <button onClick={() => push('/')}>Go back</button>
+//     </div>
+//   )
+// }
 
 function Main() {
   const { apiState, apiError, keyringState } = useSubstrateState()

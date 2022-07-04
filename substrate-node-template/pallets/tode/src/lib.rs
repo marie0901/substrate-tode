@@ -50,16 +50,17 @@ pub mod pallet {
 
 		/// The maximum amount of kitties a single account can own.
 		#[pallet::constant]
-		type MaxKittiesOwned: Get<u32>;
+		type MaxCoursesOwned: Get<u32>;
 
 		/// The type of Randomness we want to specify for this pallet.
+		/// TODO remove when add slug as a parameter to create_course
 		type KittyRandomness: Randomness<Self::Hash, Self::BlockNumber>;
 	}
 
 	// Errors
 	#[pallet::error]
 	pub enum Error<T> {
-		/// An account may only own `MaxKittiesOwned` kitties.
+		/// An account may only own `MaxCoursesOwned` courses.
 		TooManyOwned,
 		/// Trying to transfer or buy a kitty from oneself.
 		TransferToSelf,
@@ -91,45 +92,69 @@ pub mod pallet {
 		Sold { seller: T::AccountId, buyer: T::AccountId, course: [u8; 16], price: BalanceOf<T> },
 	}
 
-	/// Keeps track of the number of kitties in existence.
+	/// Keeps track of the number of courses in existence.
 	#[pallet::storage]
-	pub(super) type CountForKitties<T: Config> = StorageValue<_, u64, ValueQuery>;
+	pub(super) type CountForCourses<T: Config> = StorageValue<_, u64, ValueQuery>;
 
-	/// Maps the course struct to the courses DNA.
+	/// Maps the course struct to the courses slug.
 	#[pallet::storage]
 	pub(super) type Courses<T: Config> = StorageMap<_, Twox64Concat, [u8; 16], Course<T>>;
 
-	/// Track the kitties owned by each account.
+	/// Track the courses owned by each account.
 	#[pallet::storage]
-	pub(super) type KittiesOwned<T: Config> = StorageMap<
+	pub(super) type CoursesOwned<T: Config> = StorageMap<
 		_,
 		Twox64Concat,
 		T::AccountId,
-		BoundedVec<[u8; 16], T::MaxKittiesOwned>,
+		BoundedVec<[u8; 16], T::MaxCoursesOwned>,
 		ValueQuery,
 	>;
+
+
+
+	/// Track the courses owned by each account.
+	#[pallet::storage]
+	pub(super) type CoursesCurrentAttended<T: Config> = StorageMap<
+		_,
+		Twox64Concat,
+		T::AccountId,
+		BoundedVec<[u8; 16], T::MaxCoursesOwned>,
+		ValueQuery,
+	>;
+
+	/// Track the courses owned by each account.
+	#[pallet::storage]
+	pub(super) type CoursesCAttended<T: Config> = StorageMap<
+		_,
+		Twox64Concat,
+		T::AccountId,
+		BoundedVec<[u8; 16], T::MaxCoursesOwned>,
+		ValueQuery,
+	>;
+
+
 
 	// Our pallet's genesis configuration
 	#[pallet::genesis_config]
 	pub struct GenesisConfig<T: Config> {
-		pub kitties: Vec<(T::AccountId, [u8; 16])>,
+		pub courses: Vec<(T::AccountId, [u8; 16])>,
 	}
 
 	// Required to implement default for GenesisConfig
 	#[cfg(feature = "std")]
 	impl<T: Config> Default for GenesisConfig<T> {
 		fn default() -> GenesisConfig<T> {
-			GenesisConfig { kitties: vec![] }
+			GenesisConfig { courses: vec![] }
 		}
 	}
 
 	#[pallet::genesis_build]
 	impl<T: Config> GenesisBuild<T> for GenesisConfig<T> {
 		fn build(&self) {
-			// When building a kitty from genesis config, we require the DNA and Gender to be
+			// When building a course from genesis config, we require the slug to be
 			// supplied
-			for (account, dna) in &self.kitties {
-				assert!(Pallet::<T>::mint(account, *dna).is_ok());
+			for (account, slug) in &self.courses {
+				assert!(Pallet::<T>::mint(account, *slug).is_ok());
 			}
 		}
 	}
@@ -186,21 +211,114 @@ pub mod pallet {
 		///
 		/// If successful, this dispatchable will reset the price of the kitty to `None`, making 
 		/// it no longer for sale and handle the balance and kitty transfer between the buyer and seller.
-		#[pallet::weight(0)]
-		pub fn buy_kitty(
-			origin: OriginFor<T>,
-			kitty_id: [u8; 16],
-			limit_price: BalanceOf<T>,
-		) -> DispatchResult {
-			// Make sure the caller is from a signed origin
-			let buyer = ensure_signed(origin)?;
-			// Transfer the kitty from seller to buyer as a sale
-			Self::do_transfer(kitty_id, buyer, Some(limit_price))?;
+		/// TODO rename this function to buy a course as an owner of the course (to think if we need it at all)
+		/// TODO add a globalPrice field to use this function, because the price field we use as an attendance price
+		// #[pallet::weight(0)]
+		// pub fn buy_kitty(
+		// 	origin: OriginFor<T>,
+		// 	kitty_id: [u8; 16],
+		// 	limit_price: BalanceOf<T>,
+		// ) -> DispatchResult {
+		// 	// Make sure the caller is from a signed origin
+		// 	let buyer = ensure_signed(origin)?;
+		// 	// Transfer the kitty from seller to buyer as a sale
+		// 	Self::do_transfer(kitty_id, buyer, Some(limit_price))?;
 
-			Ok(())
-		}
+		// 	Ok(())
+		// }
 
-		/// Set the price for a Course.
+
+
+
+
+
+
+
+
+		/// Attend course
+/// check the price ??
+/// check if is not in CoursesCurrentAttended nor in CoursesCompletedAttended
+/// later we can allow to attend again and add the logic
+/// transfer balance to the course owner
+/// add the course to the CoursesCurrentAttended for caller
+
+// /// ******************************** doing ***********************************
+
+// #[pallet::weight(0)]
+// pub fn attend_course(
+// 	origin: OriginFor<T>,
+// 	course_id: [u8; 16],
+// 	limit_price: BalanceOf<T>,
+// ) -> DispatchResult {
+// 	// Make sure the caller is from a signed origin
+// 	let attendee = ensure_signed(origin)?;
+// 	// Transfer the kitty from seller to buyer as a sale
+// 	// Self::do_transfer(course_id, attendee, Some(limit_price))?;
+// //////////////Here the helper function content unkess we need the separate function for it
+// 	// Get the course
+// 	let mut course = Courses::<T>::get(&course_id).ok_or(Error::<T>::NoCourse)?;
+// 	let from = course.owner;
+
+// // 
+// // 
+// // Continue here to add the course to the list of current attendee course
+// // 
+// // 
+// // 	
+
+// 	// Remove kitty from list of owned kitties.
+// 	if let Some(ind) = from_owned.iter().position(|&id| id == course_id) {
+// 		from_owned.swap_remove(ind);
+// 	} else {
+// 		return Err(Error::<T>::NoCourse.into());
+// 	}
+
+// 	// Add kitty to the list of owned kitties.
+// 	let mut to_owned = CoursesOwned::<T>::get(&attendee);
+// 	to_owned.try_push(course_id).map_err(|()| Error::<T>::TooManyOwned)?;
+
+// 	// Mutating state here via a balance transfer, so nothing is allowed to fail after this.
+// 	// The buyer will always be charged the actual price. The limit_price parameter is just a 
+// 	// protection so the seller isn't able to front-run the transaction.
+// 	if let Some(limit_price) = Some(limit_price) {
+// 		// Current kitty price if for sale
+// 		if let Some(price) = course.price {
+// 			ensure!(limit_price >= price, Error::<T>::BidPriceTooLow);
+// 			// Transfer the amount from buyer to seller
+// 			T::Currency::transfer(&attendee, &from, price, ExistenceRequirement::KeepAlive)?;
+// 			// Deposit sold event
+// 			Self::deposit_event(Event::Sold {
+// 				seller: from.clone(),
+// 				buyer: attendee.clone(),
+// 				course: course_id,
+// 				price,
+// 			});
+// 		} else {
+// 			// Kitty price is set to `None` and is not for sale
+// 			return Err(Error::<T>::NotForSale.into());
+// 		}
+
+// ///////////// end of the helper function
+
+
+// 	Ok(())
+// }
+
+// }
+
+// /// ******************************** doing ***********************************
+
+
+
+
+
+
+
+
+
+
+
+		/// Set the price for a Course. This is the attendace price which will be refounded
 		///
 		/// Updates course price and updates storage.
 		#[pallet::weight(0)]
@@ -244,16 +362,16 @@ pub mod pallet {
 			ensure!(!Courses::<T>::contains_key(&course.slug), Error::<T>::DuplicateCourse);
 
 			// Performs this operation first as it may fail
-			let count = CountForKitties::<T>::get();
+			let count = CountForCourses::<T>::get();
 			let new_count = count.checked_add(1).ok_or(ArithmeticError::Overflow)?;
 
-			// Append kitty to KittiesOwned
-			KittiesOwned::<T>::try_append(&owner, course.slug)
+			// Append kitty to CoursesOwned
+			CoursesOwned::<T>::try_append(&owner, course.slug)
 				.map_err(|_| Error::<T>::TooManyOwned)?;
 
 			// Write new kitty to storage
 			Courses::<T>::insert(course.slug, course);
-			CountForKitties::<T>::put(new_count);
+			CountForCourses::<T>::put(new_count);
 
 			// Deposit our "Created" event.
 			Self::deposit_event(Event::Created { course: slug, owner: owner.clone() });
@@ -273,7 +391,7 @@ pub mod pallet {
 			let from = course.owner;
 
 			ensure!(from != to, Error::<T>::TransferToSelf);
-			let mut from_owned = KittiesOwned::<T>::get(&from);
+			let mut from_owned = CoursesOwned::<T>::get(&from);
 
 			// Remove kitty from list of owned kitties.
 			if let Some(ind) = from_owned.iter().position(|&id| id == course_id) {
@@ -283,7 +401,7 @@ pub mod pallet {
 			}
 
 			// Add kitty to the list of owned kitties.
-			let mut to_owned = KittiesOwned::<T>::get(&to);
+			let mut to_owned = CoursesOwned::<T>::get(&to);
 			to_owned.try_push(course_id).map_err(|()| Error::<T>::TooManyOwned)?;
 
 			// Mutating state here via a balance transfer, so nothing is allowed to fail after this.
@@ -314,8 +432,8 @@ pub mod pallet {
 
 			// Write updates to storage
 			Courses::<T>::insert(&course_id, course);
-			KittiesOwned::<T>::insert(&to, to_owned);
-			KittiesOwned::<T>::insert(&from, from_owned);
+			CoursesOwned::<T>::insert(&to, to_owned);
+			CoursesOwned::<T>::insert(&from, from_owned);
 
 			Self::deposit_event(Event::Transferred { from, to, course: course_id });
 
