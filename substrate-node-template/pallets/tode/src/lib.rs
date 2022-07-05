@@ -110,9 +110,7 @@ pub mod pallet {
 		ValueQuery,
 	>;
 
-
-
-	/// Track the courses owned by each account.
+	/// Track the courses attended in progress by each account.
 	#[pallet::storage]
 	pub(super) type CoursesCurrentAttended<T: Config> = StorageMap<
 		_,
@@ -122,9 +120,9 @@ pub mod pallet {
 		ValueQuery,
 	>;
 
-	/// Track the courses owned by each account.
+	/// Track the courses completed by each account.
 	#[pallet::storage]
-	pub(super) type CoursesCAttended<T: Config> = StorageMap<
+	pub(super) type CoursesCompletedAttended<T: Config> = StorageMap<
 		_,
 		Twox64Concat,
 		T::AccountId,
@@ -235,78 +233,121 @@ pub mod pallet {
 
 
 
-		/// Attend course
+/// Attend course
 /// check the price ??
-/// check if is not in CoursesCurrentAttended nor in CoursesCompletedAttended
-/// later we can allow to attend again and add the logic
-/// transfer balance to the course owner
-/// add the course to the CoursesCurrentAttended for caller
+/// check if is not in CoursesCurrentAttended and add to the list if not
+/// for check if is not already completed (in CoursesCompletedAttended) we rely on GUI and allow to attend again
+/// transfer balance to the course owner 
+/// (or store the balance on a special trust account ???) to be sure the CourseOwner didn't spend the money
+#[pallet::weight(0)]
+pub fn attend_course(
+	origin: OriginFor<T>,
+	course_id: [u8; 16],
+	amount: BalanceOf<T>,
+) -> DispatchResult {
+	// Make sure the caller is from a signed origin
+	let attendee = ensure_signed(origin)?;
+	//////////////Here the potencial helper function content unkess we need the separate function for it
+	// example of helper function:     Self::do_transfer(course_id, attendee, Some(limit_price))?;	
+	// Get the course
+	let course = Courses::<T>::get(&course_id).ok_or(Error::<T>::NoCourse)?;
+	let course_owner = course.owner;
+
+	// check if is not in CoursesCurrentAttended and add if not
+	let mut current_attended = CoursesCurrentAttended::<T>::get(&attendee);
+
+	if let Some(attd) = current_attended.iter().position(|&id| id == course_id) {
+		return Err(Error::<T>::NoCourse.into());
+	} else {
+		current_attended.try_push(course_id).map_err(|()| Error::<T>::TooManyOwned)?;
+	}
+
+	// Check price and send the money to the Course owner
+	// Course price is set means it is active and ready to attend
+	if let Some(price) = course.price {
+		ensure!( amount >= price, Error::<T>::BidPriceTooLow);
+		// Transfer the amount from buyer to seller
+		T::Currency::transfer(&attendee, &course_owner, price, ExistenceRequirement::KeepAlive)?;
+		// Deposit sold event
+		Self::deposit_event(Event::Sold {
+			seller: course_owner.clone(),
+			buyer: attendee.clone(),
+			course: course_id,
+			price,
+		});
+	} else {
+		// Kitty price is set to `None` and is not for sale
+		return Err(Error::<T>::NotForSale.into());
+	}
+	///////////// end of the potencial helper function
+	Ok(())
+}
+
 
 // /// ******************************** doing ***********************************
+/// Complete course
+/// check if is in CoursesCurrentAttended and remove from the list otherwithe error CourseNotAttended
+/// check if is not in CoursesCurrentCompleted and to the list, otherwise nothing to add and continue
+/// transfer balance to the course owner 
+#[pallet::weight(0)]
+pub fn complete_course(
+	origin: OriginFor<T>,
+	course_id: [u8; 16],
+) -> DispatchResult {
+	// Make sure the caller is from a signed origin
+	let attendee = ensure_signed(origin)?;
 
-// #[pallet::weight(0)]
-// pub fn attend_course(
-// 	origin: OriginFor<T>,
-// 	course_id: [u8; 16],
-// 	limit_price: BalanceOf<T>,
-// ) -> DispatchResult {
-// 	// Make sure the caller is from a signed origin
-// 	let attendee = ensure_signed(origin)?;
-// 	// Transfer the kitty from seller to buyer as a sale
-// 	// Self::do_transfer(course_id, attendee, Some(limit_price))?;
-// //////////////Here the helper function content unkess we need the separate function for it
-// 	// Get the course
-// 	let mut course = Courses::<T>::get(&course_id).ok_or(Error::<T>::NoCourse)?;
-// 	let from = course.owner;
-
-// // 
-// // 
-// // Continue here to add the course to the list of current attendee course
-// // 
-// // 
-// // 	
-
-// 	// Remove kitty from list of owned kitties.
-// 	if let Some(ind) = from_owned.iter().position(|&id| id == course_id) {
-// 		from_owned.swap_remove(ind);
-// 	} else {
-// 		return Err(Error::<T>::NoCourse.into());
-// 	}
-
-// 	// Add kitty to the list of owned kitties.
-// 	let mut to_owned = CoursesOwned::<T>::get(&attendee);
-// 	to_owned.try_push(course_id).map_err(|()| Error::<T>::TooManyOwned)?;
-
-// 	// Mutating state here via a balance transfer, so nothing is allowed to fail after this.
-// 	// The buyer will always be charged the actual price. The limit_price parameter is just a 
-// 	// protection so the seller isn't able to front-run the transaction.
-// 	if let Some(limit_price) = Some(limit_price) {
-// 		// Current kitty price if for sale
-// 		if let Some(price) = course.price {
-// 			ensure!(limit_price >= price, Error::<T>::BidPriceTooLow);
-// 			// Transfer the amount from buyer to seller
-// 			T::Currency::transfer(&attendee, &from, price, ExistenceRequirement::KeepAlive)?;
-// 			// Deposit sold event
-// 			Self::deposit_event(Event::Sold {
-// 				seller: from.clone(),
-// 				buyer: attendee.clone(),
-// 				course: course_id,
-// 				price,
-// 			});
-// 		} else {
-// 			// Kitty price is set to `None` and is not for sale
-// 			return Err(Error::<T>::NotForSale.into());
-// 		}
-
-// ///////////// end of the helper function
+	//////////////Here the helper function content unkess we need the separate function for it
+	// Get the course
+	let course = Courses::<T>::get(&course_id).ok_or(Error::<T>::NoCourse)?;
+	let course_owner = course.owner;
 
 
-// 	Ok(())
-// }
+	// check if is in CoursesCurrentAttended and remove
+	let mut current_attended = CoursesCurrentAttended::<T>::get(&attendee);
+	if let Some(ind) = current_attended.iter().position(|&id| id == course_id) {
+		current_attended.swap_remove(ind);
+	} else {
+		//TODO replace with error CourseNotAtteded
+		return Err(Error::<T>::NoCourse.into());
+	}
 
-// }
+	// check if is not in CoursesCurrentCompleted and to the list, otherwise nothing to add and continue
+	let mut completed_attended = CoursesCompletedAttended::<T>::get(&attendee);
+	if let Some(cmpltd) = completed_attended.iter().position(|&id| id == course_id) {
+		// do nothing
+		// TODO find how to make it nice using NOT FOUND
+	} else {
+		// TODO create and use error TooManyCompletedAttended
+		current_attended.try_push(course_id).map_err(|()| Error::<T>::TooManyOwned)?;
+	}
 
-// /// ******************************** doing ***********************************
+
+	if let Some(price) = course.price {
+
+	T::Currency::transfer(&attendee, &course_owner,price, ExistenceRequirement::KeepAlive)?;
+	// Deposit sold event
+	Self::deposit_event(Event::Sold {
+		seller: course_owner.clone(),
+		buyer: attendee.clone(),
+		course: course_id,
+		price,
+	});
+	} else {
+		//TODO replace with error CourseNoPrice ???
+		return Err(Error::<T>::NoCourse.into());
+	}
+
+///////////// end of the helper function
+
+
+	Ok(())
+}
+
+
+
+// /// ******************************** End of doing section ***********************************
+
 
 
 

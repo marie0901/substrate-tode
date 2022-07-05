@@ -26,6 +26,7 @@ import Transfer from './Transfer'
 import Upgrade from './Upgrade'
 import Courses from './Courses'
 import Course from './Course'
+import Quiz from './Quiz'
 
 // const Course = () => {
 //   const push = useNavigate()
@@ -117,6 +118,7 @@ export default function App() {
         <Routes>
           <Route exact path="/" element={<Main />} />
           <Route path="/course/:id" element={<Course />} />
+          <Route path="/quiz/:id" element={<Quiz />} />
         </Routes>
 
         {/* <Main /> */}

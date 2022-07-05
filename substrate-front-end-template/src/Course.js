@@ -9,7 +9,7 @@ const Course = () => {
   return (
     <div>
       <h1>Single Course id (slug) = {id} </h1>
-      <button onClick={() => push('/')}>Go back</button>
+      <button onClick={() => push('/')}> Back to All Courses </button>
       <h2>
         {' '}
         Here the content of the course, can be embedded video from youtube or
@@ -17,8 +17,9 @@ const Course = () => {
       </h2>
       <h2> </h2>
       <h2> </h2>
-      <button>Quiz to complete</button>
+      <button onClick={() => push(`/quiz/${id}`)}>Quiz</button>
       <h3> On click open Quiz modal</h3>
+
       <h3>
         {' '}
         Set state quizStatus to "Success" of "Failed" when close the modal

@@ -26,6 +26,7 @@ export default function Kitties(props) {
   const [kittyIds, setKittyIds] = useState([])
   const [kitties, setKitties] = useState([])
   const [status, setStatus] = useState('')
+  const [myCurrentCourses, setMyCurrentCourses] = useState([])
 
   const subscribeCount = () => {
     let unsub = null
@@ -64,7 +65,7 @@ export default function Kitties(props) {
   return (
     <Grid.Column width={16}>
       <h1>Courses</h1>
-      <CourseCards kitties={kitties} setStatus={setStatus} />
+      <CourseCards courses={kitties} setStatus={setStatus} />
       <Form style={{ margin: '1em 0' }}>
         <Form.Field style={{ textAlign: 'center' }}>
           <TxButton

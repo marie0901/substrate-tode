@@ -14,10 +14,74 @@ import KittyAvatar from './KittyAvatar'
 import { useSubstrateState } from './substrate-lib'
 import { TxButton } from './substrate-lib/components'
 
+//******************** */ Doing AttendCourse ***********************
+//
+//
+//
+//
+//
+//
+//
+const AttendCourse = props => {
+  const { course, setStatus } = props
+  const [open, setOpen] = React.useState(false)
+
+  const confirmAndClose = unsub => {
+    setOpen(false)
+    if (unsub && typeof unsub === 'function') unsub()
+  }
+
+  return (
+    <Modal
+      onClose={() => setOpen(false)}
+      onOpen={() => setOpen(true)}
+      open={open}
+      trigger={
+        <Button basic color="green">
+          Buy Course
+        </Button>
+      }
+    >
+      <Modal.Header>Buy Course</Modal.Header>
+      <Modal.Content>
+        <Form>
+          <Form.Input fluid label="Course ID" readOnly value={course.slug} />
+          <Form.Input fluid label="Price" readOnly value={course.price} />
+        </Form>
+      </Modal.Content>
+      <Modal.Actions>
+        <Button basic color="grey" onClick={() => setOpen(false)}>
+          Cancel
+        </Button>
+        <TxButton
+          label="Buy Course"
+          type="SIGNED-TX"
+          setStatus={setStatus}
+          onClick={confirmAndClose}
+          attrs={{
+            palletRpc: 'substrateTode',
+            callable: 'buyCourse',
+            inputParams: [course.slug, course.price],
+            paramFields: [true, true],
+          }}
+        />
+      </Modal.Actions>
+    </Modal>
+  )
+}
+
+//
+//
+//
+//
+//
+//
+// ******************** End of AttendCourse *********************************
+
 // --- Transfer Modal ---
 
 const TransferModal = props => {
-  const { kitty, setStatus } = props
+  const { course, setStatus } = props
   const [open, setOpen] = React.useState(false)
   const [formValue, setFormValue] = React.useState({})
 
@@ -41,10 +105,10 @@ const TransferModal = props => {
         </Button>
       }
     >
-      <Modal.Header>Kitty Transfer</Modal.Header>
+      <Modal.Header>Course Transfer</Modal.Header>
       <Modal.Content>
         <Form>
-          <Form.Input fluid label="Kitty ID" readOnly value={kitty.dna} />
+          <Form.Input fluid label="Course ID" readOnly value={course.slug} />
           <Form.Input
             fluid
             label="Receiver"
@@ -65,7 +129,7 @@ const TransferModal = props => {
           attrs={{
             palletRpc: 'substrateTode',
             callable: 'transfer',
-            inputParams: [formValue.target, kitty.dna],
+            inputParams: [formValue.target, course.slug],
             paramFields: [true, true],
           }}
         />
@@ -77,7 +141,7 @@ const TransferModal = props => {
 // --- Set Price ---
 
 const SetPrice = props => {
-  const { kitty, setStatus } = props
+  const { course, setStatus } = props
   const [open, setOpen] = React.useState(false)
   const [formValue, setFormValue] = React.useState({})
 
@@ -101,10 +165,10 @@ const SetPrice = props => {
         </Button>
       }
     >
-      <Modal.Header>Set Kitty Price</Modal.Header>
+      <Modal.Header>Set Course Price</Modal.Header>
       <Modal.Content>
         <Form>
-          <Form.Input fluid label="Kitty ID" readOnly value={kitty.dna} />
+          <Form.Input fluid label="Course ID" readOnly value={course.slug} />
           <Form.Input
             fluid
             label="Price"
@@ -125,7 +189,7 @@ const SetPrice = props => {
           attrs={{
             palletRpc: 'substrateTode',
             callable: 'setPrice',
-            inputParams: [kitty.dna, formValue.target],
+            inputParams: [course.slug, formValue.target],
             paramFields: [true, true],
           }}
         />
@@ -134,10 +198,10 @@ const SetPrice = props => {
   )
 }
 
-// --- Buy Kitty ---
+// --- Buy Course ---
 
-const BuyKitty = props => {
-  const { kitty, setStatus } = props
+const BuyCourse = props => {
+  const { course, setStatus } = props
   const [open, setOpen] = React.useState(false)
 
   const confirmAndClose = unsub => {
@@ -145,7 +209,7 @@ const BuyKitty = props => {
     if (unsub && typeof unsub === 'function') unsub()
   }
 
-  if (!kitty.price) {
+  if (!course.price) {
     return <></>
   }
 
@@ -163,8 +227,8 @@ const BuyKitty = props => {
       <Modal.Header>Buy Course</Modal.Header>
       <Modal.Content>
         <Form>
-          <Form.Input fluid label="Kitty ID" readOnly value={kitty.dna} />
-          <Form.Input fluid label="Price" readOnly value={kitty.price} />
+          <Form.Input fluid label="Course ID" readOnly value={course.slug} />
+          <Form.Input fluid label="Price" readOnly value={course.price} />
         </Form>
       </Modal.Content>
       <Modal.Actions>
@@ -178,8 +242,8 @@ const BuyKitty = props => {
           onClick={confirmAndClose}
           attrs={{
             palletRpc: 'substrateTode',
-            callable: 'buyKitty',
-            inputParams: [kitty.dna, kitty.price],
+            callable: 'buyCourse',
+            inputParams: [course.slug, course.price],
             paramFields: [true, true],
           }}
         />
@@ -188,14 +252,14 @@ const BuyKitty = props => {
   )
 }
 
-// --- About Kitty Card ---
+// --- About Course Card ---
 
-const KittyCard = props => {
-  const { kitty, setStatus } = props
-  const { slug = null, owner = null, gender = null, price = null } = kitty
+const CourseCard = props => {
+  const { course, setStatus } = props
+  const { slug = null, owner = null, gender = null, price = null } = course
   const displayDna = slug && slug.toJSON()
   const { currentAccount } = useSubstrateState()
-  const isSelf = currentAccount.address === kitty.owner
+  const isSelf = currentAccount.address === course.owner
 
   return (
     <Card>
@@ -220,15 +284,23 @@ const KittyCard = props => {
       <Card.Content extra style={{ textAlign: 'center' }}>
         {owner === currentAccount.address ? (
           <>
-            <SetPrice kitty={kitty} setStatus={setStatus} />
-            <TransferModal kitty={kitty} setStatus={setStatus} />
+            <SetPrice course={course} setStatus={setStatus} />
+            <TransferModal course={course} setStatus={setStatus} />
           </>
         ) : (
           <>
-            <BuyKitty kitty={kitty} setStatus={setStatus} />
+            <BuyCourse course={course} setStatus={setStatus} />
           </>
         )}
       </Card.Content>
+
+      <Card.Content>
+        <>
+          <h1>MMMMMMMMMMMMM</h1>
+          <AttendCourse course={course} setStatus={setStatus} />
+        </>
+      </Card.Content>
+
       <Card.Content>
         <Button>
           <Link to={`/course/${slug}`}>Go to Course</Link>
@@ -238,10 +310,10 @@ const KittyCard = props => {
   )
 }
 
-const KittyCards = props => {
-  const { kitties, setStatus } = props
+const CourseCards = props => {
+  const { courses, setStatus } = props
 
-  if (kitties.length === 0) {
+  if (courses.length === 0) {
     return (
       <Message info>
         <Message.Header>
@@ -256,13 +328,13 @@ const KittyCards = props => {
 
   return (
     <Grid columns={3}>
-      {kitties.map((kitty, i) => (
-        <Grid.Column key={`kitty-${i}`}>
-          <KittyCard kitty={kitty} setStatus={setStatus} />
+      {courses.map((course, i) => (
+        <Grid.Column key={`course-${i}`}>
+          <CourseCard course={course} setStatus={setStatus} />
         </Grid.Column>
       ))}
     </Grid>
   )
 }
 
-export default KittyCards
+export default CourseCards
