@@ -21,13 +21,13 @@ function toHexString(byteArray) {
   return s
 }
 
-export default function Kitties(props) {
-  const { api, keyring } = useSubstrateState()
-  const [kittyIds, setKittyIds] = useState([])
-  const [kitties, setKitties] = useState([])
+export default function Courses(props) {
+  const { api, keyring, currentAccount } = useSubstrateState()
+  const [courseIds, setCourseIds] = useState([])
+  const [courses, setCourses] = useState([])
   const [status, setStatus] = useState('')
   const [myCurrentCourses, setMyCurrentCourses] = useState([])
-
+  const [currentIds, setCurrentIds] = useState([])
   const subscribeCount = () => {
     let unsub = null
 
@@ -41,14 +41,12 @@ export default function Kitties(props) {
           // console.log('!!!!! entry', entry)
           return toHexString(entry[0].slice(-32))
         })
-        setKittyIds(ids)
+        setCourseIds(ids)
 
-        const kittiesMap = entries.map(entry => {
-          // console.log('!!!!kitty', entry[1].value.dna)
-
+        const coursesMap = entries.map(entry => {
           return parseKitty(entry[1].value)
         })
-        setKitties(kittiesMap)
+        setCourses(coursesMap)
       })
     }
 
@@ -59,13 +57,54 @@ export default function Kitties(props) {
     }
   }
 
+  //
+  //
+  //
+  //
+  //
+  const subscribeCurrentCourses = () => {
+    let unsub = null
+
+    const asyncFetchCurrent = async () => {
+      unsub = await api.query.substrateTode.coursesCurrentAttended(
+        currentAccount,
+        async current => {
+          console.log('!!!!! current ', current)
+          //
+          //
+          //
+
+          const entries =
+            await api.query.substrateTode.coursesCurrentAttended.entries()
+          console.log('!!!!! entries ', entries)
+          const currentIds = entries.map(entry => {
+            console.log('!!!!! entry', entry)
+            return toHexString(entry[0].slice(-32))
+          })
+          setCurrentIds(currentIds)
+        }
+      )
+    }
+
+    asyncFetchCurrent()
+
+    return () => {
+      unsub && unsub()
+    }
+  }
+  //
+  //
+  //
+  //
+
   useEffect(subscribeCount, [api, keyring])
-  // useEffect(subscribeKitties, [api, keyring, kittyIds])
+  useEffect(subscribeCurrentCourses, [api, keyring])
 
   return (
     <Grid.Column width={16}>
       <h1>Courses</h1>
-      <CourseCards courses={kitties} setStatus={setStatus} />
+      <div>{currentIds}</div>
+      <CourseCards courses={courses} setStatus={setStatus} />
       <Form style={{ margin: '1em 0' }}>
         <Form.Field style={{ textAlign: 'center' }}>
           <TxButton

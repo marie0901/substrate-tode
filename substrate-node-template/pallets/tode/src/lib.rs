@@ -68,6 +68,8 @@ pub mod pallet {
 		DuplicateCourse,
 		/// This course does not exist!
 		NoCourse,
+		/// You already attended the course.
+		CourseAlreadyAttended,
 		/// You are not the owner of this course.
 		NotOwner,
 		/// This kitty is not for sale.
@@ -90,6 +92,8 @@ pub mod pallet {
 		Transferred { from: T::AccountId, to: T::AccountId, course: [u8; 16] },
 		/// A kitty was successfully sold.
 		Sold { seller: T::AccountId, buyer: T::AccountId, course: [u8; 16], price: BalanceOf<T> },
+		/// A course is successfully attended and deposit is sent to owner
+		CourseAttended { course_owner: T::AccountId, attendee: T::AccountId, course: [u8; 16], price: BalanceOf<T> },
 	}
 
 	/// Keeps track of the number of courses in existence.
@@ -257,7 +261,7 @@ pub fn attend_course(
 	let mut current_attended = CoursesCurrentAttended::<T>::get(&attendee);
 
 	if let Some(attd) = current_attended.iter().position(|&id| id == course_id) {
-		return Err(Error::<T>::NoCourse.into());
+		return Err(Error::<T>::CourseAlreadyAttended.into());
 	} else {
 		current_attended.try_push(course_id).map_err(|()| Error::<T>::TooManyOwned)?;
 	}
@@ -269,18 +273,23 @@ pub fn attend_course(
 		// Transfer the amount from buyer to seller
 		T::Currency::transfer(&attendee, &course_owner, price, ExistenceRequirement::KeepAlive)?;
 		// Deposit sold event
-		Self::deposit_event(Event::Sold {
-			seller: course_owner.clone(),
-			buyer: attendee.clone(),
+		Self::deposit_event(Event::CourseAttended {
+			course_owner: course_owner.clone(),
+			attendee: attendee.clone(),
 			course: course_id,
 			price,
 		});
 	} else {
-		// Kitty price is set to `None` and is not for sale
+		// Course price is set to `None` means it is not for sale
 		return Err(Error::<T>::NotForSale.into());
 	}
-	///////////// end of the potencial helper function
+
+	// Write updates to storage
+	CoursesCurrentAttended::<T>::insert(&attendee, current_attended);
+
 	Ok(())
+	///////////// end of the helper function
+
 }
 
 
@@ -312,6 +321,8 @@ pub fn complete_course(
 		return Err(Error::<T>::NoCourse.into());
 	}
 
+	
+
 	// check if is not in CoursesCurrentCompleted and to the list, otherwise nothing to add and continue
 	let mut completed_attended = CoursesCompletedAttended::<T>::get(&attendee);
 	if let Some(cmpltd) = completed_attended.iter().position(|&id| id == course_id) {
@@ -319,14 +330,14 @@ pub fn complete_course(
 		// TODO find how to make it nice using NOT FOUND
 	} else {
 		// TODO create and use error TooManyCompletedAttended
-		current_attended.try_push(course_id).map_err(|()| Error::<T>::TooManyOwned)?;
+		completed_attended.try_push(course_id).map_err(|()| Error::<T>::TooManyOwned)?;
 	}
 
 
 	if let Some(price) = course.price {
-
-	T::Currency::transfer(&attendee, &course_owner,price, ExistenceRequirement::KeepAlive)?;
-	// Deposit sold event
+// refund transfer back from course owner to attendee
+	T::Currency::transfer(&course_owner, &attendee, price, ExistenceRequirement::KeepAlive)?;
+	// TODO Deposit new event CourseFefunded {course_owner, attendee, price}
 	Self::deposit_event(Event::Sold {
 		seller: course_owner.clone(),
 		buyer: attendee.clone(),
@@ -338,14 +349,18 @@ pub fn complete_course(
 		return Err(Error::<T>::NoCourse.into());
 	}
 
+
+
+// Write updates to storage
+CoursesCurrentAttended::<T>::insert(&attendee, current_attended);
+CoursesCompletedAttended::<T>::insert(&attendee, completed_attended);
+
+//TODO replace with new correct event CourseAttended (attendee, course_owner, course_id)
+Self::deposit_event(Event::Transferred { from: attendee, to: course_owner, course: course_id });
+
+Ok(())
 ///////////// end of the helper function
-
-
-	Ok(())
 }
-
-
-
 // /// ******************************** End of doing section ***********************************
 
 

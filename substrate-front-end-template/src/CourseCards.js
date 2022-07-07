@@ -14,14 +14,7 @@ import KittyAvatar from './KittyAvatar'
 import { useSubstrateState } from './substrate-lib'
 import { TxButton } from './substrate-lib/components'
 
-//******************** */ Doing AttendCourse ***********************
-//
-//
-//
-//
-//
-//
-//
+//*********************  AttendCourse ***********************
 const AttendCourse = props => {
   const { course, setStatus } = props
   const [open, setOpen] = React.useState(false)
@@ -38,11 +31,11 @@ const AttendCourse = props => {
       open={open}
       trigger={
         <Button basic color="green">
-          Buy Course
+          Buy(Attend) Course
         </Button>
       }
     >
-      <Modal.Header>Buy Course</Modal.Header>
+      <Modal.Header>AttendCourse</Modal.Header>
       <Modal.Content>
         <Form>
           <Form.Input fluid label="Course ID" readOnly value={course.slug} />
@@ -54,13 +47,13 @@ const AttendCourse = props => {
           Cancel
         </Button>
         <TxButton
-          label="Buy Course"
+          label="Attend Course"
           type="SIGNED-TX"
           setStatus={setStatus}
           onClick={confirmAndClose}
           attrs={{
             palletRpc: 'substrateTode',
-            callable: 'buyCourse',
+            callable: 'attendCourse',
             inputParams: [course.slug, course.price],
             paramFields: [true, true],
           }}
@@ -69,13 +62,6 @@ const AttendCourse = props => {
     </Modal>
   )
 }
-
-//
-//
-//
-//
-//
-//
 // ******************** End of AttendCourse *********************************
 
 // --- Transfer Modal ---

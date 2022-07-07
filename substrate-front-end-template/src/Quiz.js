@@ -1,10 +1,34 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import './quiz.css'
+import { TxButton } from './substrate-lib/components'
 
 function Quiz() {
   const push = useNavigate()
   const { id } = useParams()
+  const [status, setStatus] = useState('')
+
+  // const [course, setCourse] = useState({})
+
+  // const subscribeCourse = () => {
+  //   let unsub = null
+
+  //   const asyncFetch = async () => {
+  //     unsub = await  api.query.substrateTode.courses(id,
+  //       async course=> {
+  //       console.log('!!!!!course', course)
+  //       setCourse(course)
+  //   }
+  //     )
+
+  //   asyncFetch()
+
+  //   return () => {
+  //     unsub && unsub()
+  //   }
+  // }
+
+  // useEffect(subscribeCourse, [])
 
   const questions = [
     {
@@ -75,10 +99,28 @@ function Quiz() {
             }}
           >
             You scored {score} out of {questions.length}
+            <div>Satus = {status}</div>
             {score == questions.length ? (
-              <button style={{ color: '#00b5ad', borderColor: '#00b5ad' }}>
-                Complete and refund
-              </button>
+              <>
+                <button style={{ color: '#00b5ad', borderColor: '#00b5ad' }}>
+                  Delme Complete and refund
+                </button>
+
+                <TxButton
+                  label="Complete and Refund"
+                  type="SIGNED-TX"
+                  setStatus={setStatus}
+                  // onClick={push(`/course/${id}`)}
+                  attrs={{
+                    palletRpc: 'substrateTode',
+                    callable: 'attendCourse',
+                    // !!!!!!! TODO fix here
+                    // inputParams: [course.slug, course.price],
+                    inputParams: [id, 2],
+                    paramFields: [true, true],
+                  }}
+                />
+              </>
             ) : (
               <>
                 {' '}
