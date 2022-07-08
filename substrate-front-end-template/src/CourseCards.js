@@ -241,11 +241,12 @@ const BuyCourse = props => {
 // --- About Course Card ---
 
 const CourseCard = props => {
-  const { course, setStatus } = props
+  const { course, setStatus, currentIds } = props
   const { slug = null, owner = null, gender = null, price = null } = course
   const displayDna = slug && slug.toJSON()
   const { currentAccount } = useSubstrateState()
   const isSelf = currentAccount.address === course.owner
+  const isCurrent = currentIds.find(id => id == slug)
 
   return (
     <Card>
@@ -254,8 +255,20 @@ const CourseCard = props => {
           Mine
         </Label>
       )}
+      {isCurrent && (
+        <Label as="a" floating color="green">
+          Current
+        </Label>
+      )}
+      {isCurrent && (
+        <Label as="a" floating color="blue">
+          Completed
+        </Label>
+      )}
       <KittyAvatar dna={slug.toU8a()} />
       <Card.Content>
+        <h1>isCurrent = {isCurrent}</h1>
+        <h1>currentIds = {currentIds}</h1>
         <Card.Meta style={{ fontSize: '.9em', overflowWrap: 'break-word' }}>
           DNA: {displayDna}
         </Card.Meta>
@@ -297,7 +310,7 @@ const CourseCard = props => {
 }
 
 const CourseCards = props => {
-  const { courses, setStatus } = props
+  const { courses, setStatus, currentIds } = props
 
   if (courses.length === 0) {
     return (
@@ -316,7 +329,11 @@ const CourseCards = props => {
     <Grid columns={3}>
       {courses.map((course, i) => (
         <Grid.Column key={`course-${i}`}>
-          <CourseCard course={course} setStatus={setStatus} />
+          <CourseCard
+            course={course}
+            setStatus={setStatus}
+            currentIds={currentIds}
+          />
         </Grid.Column>
       ))}
     </Grid>

@@ -15,6 +15,13 @@ const Course = () => {
         Here the content of the course, can be embedded video from youtube or
         vimeo
       </h2>
+      <h3>Iframes in React</h3>
+      <iframe
+        src="https://www.youtube.com/embed/uXWycyeTeCs"
+        width={1000}
+        height={500}
+      ></iframe>
+
       <h2> </h2>
       <h2> </h2>
       <button onClick={() => push(`/quiz/${id}`)}>Quiz</button>

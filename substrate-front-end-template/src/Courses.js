@@ -26,7 +26,7 @@ export default function Courses(props) {
   const [courseIds, setCourseIds] = useState([])
   const [courses, setCourses] = useState([])
   const [status, setStatus] = useState('')
-  const [myCurrentCourses, setMyCurrentCourses] = useState([])
+  // const [myCurrentCourses, setMyCurrentCourses] = useState([])
   const [currentIds, setCurrentIds] = useState([])
   const subscribeCount = () => {
     let unsub = null
@@ -66,22 +66,27 @@ export default function Courses(props) {
     let unsub = null
 
     const asyncFetchCurrent = async () => {
+      const acc = currentAccount ? currentAccount.address : ''
       unsub = await api.query.substrateTode.coursesCurrentAttended(
-        currentAccount,
+        acc,
+        // '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
         async current => {
           console.log('!!!!! current ', current)
           //
           //
           //
 
-          const entries =
-            await api.query.substrateTode.coursesCurrentAttended.entries()
-          console.log('!!!!! entries ', entries)
-          const currentIds = entries.map(entry => {
-            console.log('!!!!! entry', entry)
-            return toHexString(entry[0].slice(-32))
+          const myCurrentCourses = current.map(item => {
+            console.log(
+              '!!!!! toHexString(item.slice(-32))',
+              toHexString(item.slice(-32))
+            )
+            return toHexString(item.slice(-32))
           })
-          setCurrentIds(currentIds)
+
+          console.log('!!!!! myCurrentCourses', myCurrentCourses)
+
+          setCurrentIds(myCurrentCourses)
         }
       )
     }
@@ -98,13 +103,17 @@ export default function Courses(props) {
   //
 
   useEffect(subscribeCount, [api, keyring])
-  useEffect(subscribeCurrentCourses, [api, keyring])
+  useEffect(subscribeCurrentCourses, [api, keyring, currentAccount])
 
   return (
     <Grid.Column width={16}>
       <h1>Courses</h1>
       <div>{currentIds}</div>
-      <CourseCards courses={courses} setStatus={setStatus} />
+      <CourseCards
+        courses={courses}
+        currentIds={currentIds}
+        setStatus={setStatus}
+      />
       <Form style={{ margin: '1em 0' }}>
         <Form.Field style={{ textAlign: 'center' }}>
           <TxButton
