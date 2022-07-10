@@ -9,6 +9,8 @@ import {
 } from 'semantic-ui-react'
 import 'semantic-ui-css/semantic.min.css'
 
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
+
 import { SubstrateContextProvider, useSubstrateState } from './substrate-lib'
 import { DeveloperConsole } from './substrate-lib/components'
 
@@ -22,7 +24,21 @@ import NodeInfo from './NodeInfo'
 import TemplateModule from './TemplateModule'
 import Transfer from './Transfer'
 import Upgrade from './Upgrade'
-import Kitties from './Kitties'
+import Courses from './Courses'
+import Course from './Course'
+import Quiz from './Quiz'
+
+// const Course = () => {
+//   const push = useNavigate()
+//   const { id } = useParams()
+
+//   return (
+//     <div>
+//       <h1>Single Course id (dna) = {id} </h1>
+//       <button onClick={() => push('/')}>Go back</button>
+//     </div>
+//   )
+// }
 
 function Main() {
   const { apiState, apiError, keyringState } = useSubstrateState()
@@ -72,9 +88,9 @@ function Main() {
             <BlockNumber finalized />
           </Grid.Row>
           <Grid.Row>
-            <Kitties />
+            <Courses />
           </Grid.Row>
-          <Grid.Row stretched>
+          {/* <Grid.Row stretched>
             <Balances />
           </Grid.Row>
           <Grid.Row>
@@ -87,7 +103,7 @@ function Main() {
           </Grid.Row>
           <Grid.Row>
             <TemplateModule />
-          </Grid.Row>
+          </Grid.Row> */}
         </Grid>
       </Container>
       <DeveloperConsole />
@@ -97,8 +113,16 @@ function Main() {
 
 export default function App() {
   return (
-    <SubstrateContextProvider>
-      <Main />
-    </SubstrateContextProvider>
+    <Router>
+      <SubstrateContextProvider>
+        <Routes>
+          <Route exact path="/" element={<Main />} />
+          <Route path="/course/:id" element={<Course />} />
+          <Route path="/quiz/:id" element={<Quiz />} />
+        </Routes>
+
+        {/* <Main /> */}
+      </SubstrateContextProvider>
+    </Router>
   )
 }
