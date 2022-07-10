@@ -28,6 +28,8 @@ export default function Courses(props) {
   const [status, setStatus] = useState('')
   // const [myCurrentCourses, setMyCurrentCourses] = useState([])
   const [currentIds, setCurrentIds] = useState([])
+  const [completedIds, setCompletedIds] = useState([])
+
   const subscribeCount = () => {
     let unsub = null
 
@@ -57,11 +59,6 @@ export default function Courses(props) {
     }
   }
 
-  //
-  //
-  //
-  //
-  //
   const subscribeCurrentCourses = () => {
     let unsub = null
 
@@ -69,30 +66,16 @@ export default function Courses(props) {
       const acc = currentAccount ? currentAccount.address : ''
       unsub = await api.query.substrateTode.coursesCurrentAttended(
         acc,
-        // '5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty',
         async current => {
-          console.log('!!!!! current ', current)
-          //
-          //
-          //
-
           const myCurrentCourses = current.map(item => {
-            console.log(
-              '!!!!! toHexString(item.slice(-32))',
-              toHexString(item.slice(-32))
-            )
             return toHexString(item.slice(-32))
           })
-
           console.log('!!!!! myCurrentCourses', myCurrentCourses)
-
           setCurrentIds(myCurrentCourses)
         }
       )
     }
-
     asyncFetchCurrent()
-
     return () => {
       unsub && unsub()
     }
@@ -102,16 +85,50 @@ export default function Courses(props) {
   //
   //
 
+  const subscribeCompletedCourses = () => {
+    let unsub = null
+
+    const asyncFetchCompleted = async () => {
+      const acc = currentAccount ? currentAccount.address : ''
+      unsub = await api.query.substrateTode.coursesCompletedAttended(
+        acc,
+        async completed => {
+          console.log('!!!!! completed ', completed)
+          const myCompletedCourses = completed.map(item => {
+            console.log(
+              '!!!!! toHexString(item.slice(-32))',
+              toHexString(item.slice(-32))
+            )
+            return toHexString(item.slice(-32))
+          })
+          console.log('!!!!! myCompletedCourses', myCompletedCourses)
+          setCompletedIds(myCompletedCourses)
+        }
+      )
+    }
+    asyncFetchCompleted()
+    return () => {
+      unsub && unsub()
+    }
+  }
+
+  //
+  //
+  //
+  //
+  //
+  //
   useEffect(subscribeCount, [api, keyring])
   useEffect(subscribeCurrentCourses, [api, keyring, currentAccount])
+  useEffect(subscribeCompletedCourses, [api, keyring, currentAccount])
 
   return (
     <Grid.Column width={16}>
       <h1>Courses</h1>
-      <div>{currentIds}</div>
       <CourseCards
         courses={courses}
         currentIds={currentIds}
+        completedIds={completedIds}
         setStatus={setStatus}
       />
       <Form style={{ margin: '1em 0' }}>

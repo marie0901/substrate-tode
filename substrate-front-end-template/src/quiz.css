@@ -25,13 +25,13 @@ body {
 }
 
 .app {
-  background: linear-gradient(5deg, blue 0%, white 30%);
+  /* background: linear-gradient(5deg, blue 0%, white 30%); */
   width: 95%;
   min-height: 200px;
   height: min-content;
-  border-radius: 15px;
+  border-radius: 5px;
   padding: 20px;
-  box-shadow: 10px 10px 42px 0px rgba(0, 0, 0, 0.75);
+  box-shadow: 10px 10px 32px 0px rgba(0, 50, 100, 0.45);
   display: flex;
   justify-content: space-evenly;
 }

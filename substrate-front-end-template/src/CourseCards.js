@@ -10,7 +10,7 @@ import {
   Label,
 } from 'semantic-ui-react'
 
-import KittyAvatar from './KittyAvatar'
+import CourseAvatar from './CourseAvatar'
 import { useSubstrateState } from './substrate-lib'
 import { TxButton } from './substrate-lib/components'
 
@@ -31,7 +31,7 @@ const AttendCourse = props => {
       open={open}
       trigger={
         <Button basic color="green">
-          Buy(Attend) Course
+          Attend Course
         </Button>
       }
     >
@@ -241,12 +241,13 @@ const BuyCourse = props => {
 // --- About Course Card ---
 
 const CourseCard = props => {
-  const { course, setStatus, currentIds } = props
+  const { course, setStatus, currentIds, completedIds, image } = props
   const { slug = null, owner = null, gender = null, price = null } = course
   const displayDna = slug && slug.toJSON()
   const { currentAccount } = useSubstrateState()
   const isSelf = currentAccount.address === course.owner
   const isCurrent = currentIds.find(id => id == slug)
+  const isCompleted = completedIds.find(id => id == slug)
 
   return (
     <Card>
@@ -260,57 +261,52 @@ const CourseCard = props => {
           Current
         </Label>
       )}
-      {isCurrent && (
+      {isCompleted && !isCurrent && (
         <Label as="a" floating color="blue">
           Completed
         </Label>
       )}
-      <KittyAvatar dna={slug.toU8a()} />
+      <CourseAvatar dna={slug.toU8a()} image={image} />
       <Card.Content>
-        <h1>isCurrent = {isCurrent}</h1>
-        <h1>currentIds = {currentIds}</h1>
         <Card.Meta style={{ fontSize: '.9em', overflowWrap: 'break-word' }}>
-          DNA: {displayDna}
+          Course Id: {displayDna}
         </Card.Meta>
         <Card.Description>
-          <p style={{ overflowWrap: 'break-word' }}>Gender: {gender}</p>
-          <p style={{ overflowWrap: 'break-word' }}>Owner: {owner}</p>
+          <p style={{ overflowWrap: 'break-word' }}>
+            Owner: {`TODE Lauguage University`}
+          </p>
           <p style={{ overflowWrap: 'break-word' }}>
             Price: {price || 'Not For Sale'}
           </p>
         </Card.Description>
       </Card.Content>
-      <Card.Content extra style={{ textAlign: 'center' }}>
-        {owner === currentAccount.address ? (
+
+      {owner === currentAccount.address ? (
+        <Card.Content extra style={{ textAlign: 'center' }}>
           <>
             <SetPrice course={course} setStatus={setStatus} />
             <TransferModal course={course} setStatus={setStatus} />
           </>
-        ) : (
-          <>
-            <BuyCourse course={course} setStatus={setStatus} />
-          </>
+        </Card.Content>
+      ) : (
+        <>{/* <BuyCourse course={course} setStatus={setStatus} /> */}</>
+      )}
+
+      <Card.Content>
+        {!isCurrent && <AttendCourse course={course} setStatus={setStatus} />}
+
+        {isCurrent && (
+          <Button basic color="blue">
+            <Link to={`/course/${slug}`}>Go to Course</Link>
+          </Button>
         )}
-      </Card.Content>
-
-      <Card.Content>
-        <>
-          <h1>MMMMMMMMMMMMM</h1>
-          <AttendCourse course={course} setStatus={setStatus} />
-        </>
-      </Card.Content>
-
-      <Card.Content>
-        <Button>
-          <Link to={`/course/${slug}`}>Go to Course</Link>
-        </Button>
       </Card.Content>
     </Card>
   )
 }
 
 const CourseCards = props => {
-  const { courses, setStatus, currentIds } = props
+  const { courses, setStatus, currentIds, completedIds } = props
 
   if (courses.length === 0) {
     return (
@@ -333,6 +329,8 @@ const CourseCards = props => {
             course={course}
             setStatus={setStatus}
             currentIds={currentIds}
+            completedIds={completedIds}
+            image={(i % 3) + 1}
           />
         </Grid.Column>
       ))}
