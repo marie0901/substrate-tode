@@ -120,7 +120,7 @@ function BalanceAnnotation(props) {
     currentAccount &&
       api.query.system
         .account(acctAddr(currentAccount), balance =>
-          setAccountBalance(balance.data.free.toHuman())
+          setAccountBalance(balance.data.free / 1000000000)
         )
         .then(unsub => (unsubscribe = unsub))
         .catch(console.error)

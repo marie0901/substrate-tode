@@ -39,7 +39,12 @@ const AttendCourse = props => {
       <Modal.Content>
         <Form>
           <Form.Input fluid label="Course ID" readOnly value={course.slug} />
-          <Form.Input fluid label="Price" readOnly value={course.price} />
+          <Form.Input
+            fluid
+            label="Price"
+            readOnly
+            value={course.price / 1000000000}
+          />
         </Form>
       </Modal.Content>
       <Modal.Actions>
@@ -276,7 +281,7 @@ const CourseCard = props => {
             Owner: {`TODE Lauguage University`}
           </p>
           <p style={{ overflowWrap: 'break-word' }}>
-            Price: {price || 'Not For Sale'}
+            Price: {price / 1000000000 || 'Not For Sale'}
           </p>
         </Card.Description>
       </Card.Content>

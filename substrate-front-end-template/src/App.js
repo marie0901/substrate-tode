@@ -90,7 +90,7 @@ function Main() {
           <Grid.Row>
             <Courses />
           </Grid.Row>
-          <Grid.Row stretched>
+          {/* <Grid.Row stretched>
             <Balances />
           </Grid.Row>
           <Grid.Row>
@@ -103,7 +103,7 @@ function Main() {
           </Grid.Row>
           <Grid.Row>
             <TemplateModule />
-          </Grid.Row>
+          </Grid.Row> */}
         </Grid>
       </Container>
       <DeveloperConsole />
